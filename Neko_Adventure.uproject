@@ -1,8 +1,18 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "EUNEIZ-UE-5.8.2",
+	"EngineAssociation": "{9535ABDE-4064-6088-5F9B-E09F2BA7C05B}",
 	"Category": "",
 	"Description": "",
+	"Modules": [
+		{
+			"Name": "Neko_Adventure",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
