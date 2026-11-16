@@ -3,6 +3,16 @@
 	"EngineAssociation": "EUNEIZ-UE-5.8.2",
 	"Category": "",
 	"Description": "",
+	"Modules": [
+		{
+			"Name": "Neko_Adventure",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
