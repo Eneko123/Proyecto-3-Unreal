@@ -5,6 +5,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interactuables.generated.h"
+#include "InteractuableComponent.h"
+
+UENUM(BlueprintType)
+enum class ETipoInteractuable : uint8
+{
+	Curacion   UMETA(DisplayName = "Curacion"),
+	Destruible UMETA(DisplayName = "Destruible"),
+	Moneda     UMETA(DisplayName = "Moneda")
+};
 
 UCLASS()
 class NEKO_ADVENTURE_API AInteractuables : public AActor
@@ -17,6 +26,9 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interactuable")
+	ETipoInteractuable TipoSeleccionado;
 
 protected:
 	// Called when the game starts or when spawned
@@ -32,6 +44,9 @@ protected:
 		bool bFromSweep,
 		const FHitResult& SweepResult
 	);
+
+	UPROPERTY()
+	UInteractuableComponent* CompActivo;
 
 private:	
 

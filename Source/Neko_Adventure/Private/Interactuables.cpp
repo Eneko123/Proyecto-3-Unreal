@@ -23,25 +23,47 @@ AInteractuables::AInteractuables()
 void AInteractuables::BeginPlay()
 {
 	Super::BeginPlay();
-	
-    // Suscribirse al evento de overlap
-    TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AInteractuables::OnOverlapBegin);
+
+	TriggerBox->OnComponentBeginOverlap.AddDynamic(this, &AInteractuables::OnOverlapBegin);
+
+	// Buscar el componente según el enum
+	FName NombreComp;
+	switch (TipoSeleccionado)
+	{
+	case ETipoInteractuable::Curacion:   NombreComp = TEXT("Curaciones");  break;
+	case ETipoInteractuable::Destruible: NombreComp = TEXT("Destruibles"); break;
+	case ETipoInteractuable::Moneda:     NombreComp = TEXT("Monedas");     break;
+	}
+
+	TArray<UInteractuableComponent*> Comps;
+	GetComponents<UInteractuableComponent>(Comps);
+	for (UInteractuableComponent* C : Comps)
+	{
+		if (C->GetFName() == NombreComp)
+		{
+			CompActivo = C;
+		}
+		else
+		{
+			// Desactivar los demás para que no hagan nada
+			C->Deactivate();
+			C->SetComponentTickEnabled(false);
+		}
+	}
 }
 
 void AInteractuables::OnOverlapBegin(
-    UPrimitiveComponent* OverlappedComp,
-    AActor* OtherActor,
-    UPrimitiveComponent* OtherComp,
-    int32 OtherBodyIndex,
-    bool bFromSweep,
-    const FHitResult& SweepResult
-)
+	UPrimitiveComponent* OverlappedComp,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
 {
-    if (OtherActor && OtherActor != this)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Actor %s ha entrado en el trigger"), *OtherActor->GetName());
-        // Aquí puedes poner tu lógica, por ejemplo mover el actor o iniciar una animación
-    }
+	if (OtherActor && OtherActor != this && CompActivo)
+	{
+		CompActivo->Ejecutar(OtherActor);
+	}
 }
 
 // Called every frame
