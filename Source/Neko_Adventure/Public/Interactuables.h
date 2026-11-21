@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Interactuables.generated.h"
 #include "InteractuableComponent.h"
+#include "Interactuables.generated.h"
 
 UENUM(BlueprintType)
 enum class ETipoInteractuable : uint8

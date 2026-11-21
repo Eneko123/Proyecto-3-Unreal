@@ -17,4 +17,13 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void Ejecutar(AActor* Instigador);
 	virtual void Ejecutar_Implementation(AActor* Instigador) {}
+
+	UInteractuableComponent();
+
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+protected:
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
 };
