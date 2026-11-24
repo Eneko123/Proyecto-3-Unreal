@@ -12,7 +12,8 @@ enum class ETipoInteractuable : uint8
 {
 	Curacion   UMETA(DisplayName = "Curacion"),
 	Destruible UMETA(DisplayName = "Destruible"),
-	Moneda     UMETA(DisplayName = "Moneda")
+	Moneda     UMETA(DisplayName = "Flores"),
+	HablarNPC     UMETA(DisplayName = "HablarNPC")
 };
 
 UCLASS()
