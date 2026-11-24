@@ -12,6 +12,9 @@ UJugadorComponent::UJugadorComponent()
 {
 	// Este componente no necesita Tick: todo funciona por eventos
 	PrimaryComponentTick.bCanEverTick = false;
+
+	// NUEVO: combo de 3 golpes; el daño sube en cada golpe
+	MultiplicadoresCombo = { 1.0f, 1.25f, 1.5f };
 }
 
 void UJugadorComponent::BeginPlay()
@@ -20,6 +23,10 @@ void UJugadorComponent::BeginPlay()
 
 	// Empieza con la vida llena
 	Vida = VidaMaxima;
+
+	// NUEVO: estado inicial del combo
+	PasoCombo = 0;
+	DanioAtaqueActual = Danio;
 
 	if (AActor* Propietario = GetOwner())
 	{
@@ -38,6 +45,19 @@ float UJugadorComponent::GetPorcentajeVida() const
 	return VidaMaxima > 0 ? static_cast<float>(Vida) / static_cast<float>(VidaMaxima) : 0.f;
 }
 
+// NUEVO
+int32 UJugadorComponent::GetNumGolpesCombo() const
+{
+	return FMath::Max(1, MultiplicadoresCombo.Num());
+}
+
+// NUEVO
+void UJugadorComponent::ReiniciarCombo()
+{
+	PasoCombo = 0;
+}
+
+// CAMBIADO: ahora lleva la cuenta del combo
 bool UJugadorComponent::IntentarAtacar()
 {
 	if (!EstaVivo())
@@ -53,14 +73,31 @@ bool UJugadorComponent::IntentarAtacar()
 
 	// Respeta el tiempo de espera entre ataques
 	const float Ahora = Mundo->GetTimeSeconds();
-	if (Ahora - TiempoUltimoAtaque < TiempoEntreAtaques)
+	const float TiempoDesdeUltimo = Ahora - TiempoUltimoAtaque;
+	if (TiempoDesdeUltimo < TiempoEntreAtaques)
 	{
 		return false;
 	}
+
+	// NUEVO: si tardaste demasiado o ya hiciste el último golpe, el combo empieza de nuevo
+	const int32 NumGolpes = GetNumGolpesCombo();
+	if (TiempoDesdeUltimo > VentanaCombo || PasoCombo >= NumGolpes)
+	{
+		PasoCombo = 0;
+	}
+
 	TiempoUltimoAtaque = Ahora;
 
+	// NUEVO: siguiente golpe del combo y su daño
+	++PasoCombo;
+	const bool bEsGolpeFinal = PasoCombo >= NumGolpes;
+	const float Multiplicador = MultiplicadoresCombo.IsValidIndex(PasoCombo - 1) ? MultiplicadoresCombo[PasoCombo - 1] : 1.f;
+	DanioAtaqueActual = FMath::RoundToInt(static_cast<float>(Danio) * Multiplicador);
+
+	UE_LOG(LogTemp, Log, TEXT("Golpe %d/%d del combo (%d de daño)"), PasoCombo, NumGolpes, DanioAtaqueActual);
+
 	// Avisa al Blueprint (animación) y aplica el golpe
-	OnAtaque.Broadcast();
+	OnAtaque.Broadcast(PasoCombo, bEsGolpeFinal); // CAMBIADO
 	AplicarGolpe();
 
 	return true;
@@ -103,8 +140,9 @@ int32 UJugadorComponent::AplicarGolpe()
 		}
 		Golpeados.Add(Actor);
 
-		UGameplayStatics::ApplyDamage(Actor, static_cast<float>(Danio), Controlador, Propietario, nullptr);
-		UE_LOG(LogTemp, Log, TEXT("El jugador golpeó a %s con %d de daño"), *Actor->GetName(), Danio);
+		// CAMBIADO: usa el daño del paso actual del combo
+		UGameplayStatics::ApplyDamage(Actor, static_cast<float>(DanioAtaqueActual), Controlador, Propietario, nullptr);
+		UE_LOG(LogTemp, Log, TEXT("El jugador golpeó a %s con %d de daño"), *Actor->GetName(), DanioAtaqueActual);
 	}
 
 	if (bMostrarGolpe)
@@ -150,6 +188,8 @@ void UJugadorComponent::Morir()
 	bMuerto = true;
 
 	UE_LOG(LogTemp, Warning, TEXT("El jugador ha muerto"));
+
+	ReiniciarCombo(); // NUEVO
 
 	OnMuerte.Broadcast();
 
