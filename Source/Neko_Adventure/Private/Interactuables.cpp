@@ -32,7 +32,8 @@ void AInteractuables::BeginPlay()
 	{
 	case ETipoInteractuable::Curacion:   NombreComp = TEXT("Curaciones");  break;
 	case ETipoInteractuable::Destruible: NombreComp = TEXT("Destruibles"); break;
-	case ETipoInteractuable::Moneda:     NombreComp = TEXT("Monedas");     break;
+	case ETipoInteractuable::Moneda:     NombreComp = TEXT("Flores");     break;
+	case ETipoInteractuable::HablarNPC:     NombreComp = TEXT("HablarNPC");     break;
 	}
 
 	TArray<UInteractuableComponent*> Comps;
